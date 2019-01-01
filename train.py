@@ -1,8 +1,7 @@
 # encoding: utf-8
 # 予測問題。 通常データ train/ test.csv の使用して検証する。
-# 2019/01/01 11:53 :ダミー変数処理の前に、train ,test 結合しておく。
 # 評価
-# score : 20.1
+# score : XX
 
 
 # 途中で使用するため、あらかじめ読み込んでおいてください。
@@ -25,7 +24,6 @@ import time
 #
 def conv_dats(df):
     #欠損値の補完
-    #以下はNaN = NAかNoneの特徴量リスト。よって欠損値をそれぞれNAとNoneで補完する。
     df["PoolQC"].fillna('NA', inplace=True)
     df["MiscFeature"].fillna('None', inplace=True)
     df["Alley"].fillna('NA', inplace=True)
@@ -41,8 +39,7 @@ def conv_dats(df):
     df["BsmtFinType2"].fillna('NA', inplace=True)
     df["BsmtFinType1"].fillna('NA', inplace=True)
     df["MasVnrType"].fillna('None', inplace=True)
-    #以下はNaN = 0の特徴量リスト。例えば地下なら、地下がないんだから0。みたいな。
-    # ガレージ築年数を0にするのも不思議な気はしますが、そもそもガレージがないので他に妥当な数字が思いつかず。
+    #
     df["GarageYrBlt"].fillna(0, inplace=True) 
     df["MasVnrArea"].fillna(0, inplace=True)
     df["BsmtHalfBath"].fillna(0, inplace=True)
@@ -54,7 +51,6 @@ def conv_dats(df):
     df["GarageArea"].fillna(0, inplace=True)
     df["GarageCars"].fillna(0, inplace=True)
     #
-    #欠損レコード数が少なく、大半が一つの値をとっているためあまりに予測の役に立たなさそうな特徴量は単純に最頻値を代入
     df["MSZoning"].fillna('RL', inplace=True)
     df["Functional"].fillna('Typ', inplace=True)
     df["Utilities"].fillna("AllPub", inplace=True)
@@ -63,15 +59,13 @@ def conv_dats(df):
     df['Exterior1st'] = df['Exterior1st'].fillna(df['Exterior1st'].mode()[0])
     df['KitchenQual'] = df['KitchenQual'].fillna(df['KitchenQual'].mode()[0])
     df['Electrical']  = df['Electrical'].fillna(df['Electrical'].mode()[0])
-    #これは補完方法が明らかかつ簡単で、近くのStreet名=Neighborhoodでグループし平均を取れば良い精度で補完できそう。
+    #
     f = lambda x: x.fillna(x.mean())
     df["LotFrontage"] = df.groupby("Neighborhood")["LotFrontage"].transform(f)
     return df
 
 # 学習データ
 global_start_time = time.time()
-#train_data = pd.read_csv("data/train.csv" )
-#test_data = pd.read_csv("data/test.csv" )
 train_data = pd.read_csv("train.csv" )
 test_data = pd.read_csv("test.csv" )
 #print( train_data.shape )
@@ -143,8 +137,6 @@ df.to_csv("out.csv", index_label=["Id"])
 
 #plt
 a1=np.arange(len(x_test) )
-#plt.plot(a1 , y_train  , label = "y_train")
-#plt.plot(a1 , y_test  , label = "y_test")
 plt.plot(a1 , pred , label = "predict")
 plt.legend()
 plt.grid(True)
